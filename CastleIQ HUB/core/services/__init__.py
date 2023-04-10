@@ -59,6 +59,14 @@ class ModelService(Service):
             )
         return self.pydantic_model_out
 
+    @property
+    def pmi(self) -> type["BaseModel"]:
+        return self.get_pydantic_model_in()
+        
+    @property
+    def pmo(self) -> type["BaseModel"]:
+        return self.get_pydantic_model_in()
+
     def _raise_if_object_types_dont_match(self, obj: any, t: type):
         if type(obj) != t:
             raise TypeError(f"Object {obj} type {type(obj)} does not match with {t}")

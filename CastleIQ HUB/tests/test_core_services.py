@@ -50,7 +50,7 @@ def test_empty_constructor_as_inherited():
 
 @pytest.mark.anyio
 async def test_creation(ms: ModelService):
-    obj = await ms.api_create_object(ms.get_pydantic_model_in()(name="Hello", password="World"))
+    obj = await ms.api_create_object(ms.pmi(name="Hello", password="World"))
     assert obj.pk != None
 
 
@@ -77,7 +77,7 @@ async def test_creation_arguments_same_dataclass(ms: ModelService):
 
 @pytest.mark.anyio
 async def test_get_object(ms: ModelService):
-    obj = await ms.api_create_object(ms.get_pydantic_model_in()(name="Hello", password="World"))
+    obj = await ms.api_create_object(ms.pmi(name="Hello", password="World"))
     assert obj.pk != None
     obj_from_db = await ms.api_get_object(obj.pk)
     assert obj == obj_from_db
@@ -91,7 +91,7 @@ async def test_get_object_does_not_exist(ms: ModelService):
 @pytest.mark.anyio
 async def test_get_multiple(ms: ModelService):
     for i in range(10):
-        await ms.api_create_object(ms.get_pydantic_model_in()(name=f"name {i}", password=f"password {i}"))
+        await ms.api_create_object(ms.pmi(name=f"name {i}", password=f"password {i}"))
 
     objects = await ms.api_get_multiple()
     assert len(objects) == 10
@@ -100,7 +100,7 @@ async def test_get_multiple(ms: ModelService):
 @pytest.mark.anyio
 async def test_get_multiple_with_params(ms: ModelService):
     for i in range(10):
-        await ms.api_create_object(ms.get_pydantic_model_in()(name=f"name {i}", password=f"password {i}"))
+        await ms.api_create_object(ms.pmi(name=f"name {i}", password=f"password {i}"))
 
     objects = await ms.api_get_multiple(offset=1, limit=3)
     assert len(objects) == 3
@@ -109,7 +109,7 @@ async def test_get_multiple_with_params(ms: ModelService):
 @pytest.mark.anyio
 async def test_get_all(ms: ModelService):
     for i in range(10):
-        await ms.api_create_object(ms.get_pydantic_model_in()(name=f"name {i}", password=f"password {i}"))
+        await ms.api_create_object(ms.pmi(name=f"name {i}", password=f"password {i}"))
 
     objects = await ms.api_get_all()
     assert len(objects) == 10
@@ -117,9 +117,9 @@ async def test_get_all(ms: ModelService):
 
 @pytest.mark.anyio
 async def test_update(ms: ModelService):
-    obj = await ms.api_create_object(ms.get_pydantic_model_in()(name=f"name 1", password=f"password 1"))
+    obj = await ms.api_create_object(ms.pmi(name=f"name 1", password=f"password 1"))
 
-    upd_obj = await ms.api_update_object(obj.pk, ms.get_pydantic_model_in()(name="name 1 updated", password="password 1 updated"))
+    upd_obj = await ms.api_update_object(obj.pk, ms.pmi(name="name 1 updated", password="password 1 updated"))
 
     assert upd_obj.pk == obj.pk
     assert upd_obj.name == "name 1 updated"
@@ -128,12 +128,12 @@ async def test_update(ms: ModelService):
 @pytest.mark.anyio
 async def test_update_not_existing(ms: ModelService):
     with pytest.raises(DoesNotExist):
-        upd_obj = await ms.api_update_object(1_000_000, ms.get_pydantic_model_in()(name="name 1 updated", password="password 1 updated"))
+        upd_obj = await ms.api_update_object(1_000_000, ms.pmi(name="name 1 updated", password="password 1 updated"))
 
 
 @pytest.mark.anyio
 async def test_delete(ms: ModelService):
-    obj = await ms.api_create_object(ms.get_pydantic_model_in()(name=f"name 1", password=f"password 1"))
+    obj = await ms.api_create_object(ms.pmi(name=f"name 1", password=f"password 1"))
     
     assert await ExampleModel.all().count() == 1
 
