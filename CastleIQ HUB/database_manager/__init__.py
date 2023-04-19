@@ -1,7 +1,7 @@
 from tortoise.contrib.fastapi import register_tortoise
 from config import conf
 from api import app
-
+from logger import logger
 
 TORTOISE_ORM = {
     "connections": {
@@ -13,16 +13,16 @@ TORTOISE_ORM = {
             "default_connection": "default",
         },
     },
-    "add_exception_handlers":True
+    "add_exception_handlers": True
 }
 
+logger.debug(f"{TORTOISE_ORM=}")
 
 register_tortoise(
     app,
     config=TORTOISE_ORM,
     add_exception_handlers=True
 )
-
 
 # register_tortoise(
 #     app,
