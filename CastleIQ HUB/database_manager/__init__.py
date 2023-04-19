@@ -16,8 +16,6 @@ TORTOISE_ORM = {
     "add_exception_handlers": True
 }
 
-logger.debug(f"{TORTOISE_ORM=}")
-
 register_tortoise(
     app,
     config=TORTOISE_ORM,
