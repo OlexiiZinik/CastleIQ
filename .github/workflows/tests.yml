@@ -19,7 +19,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - defaults:
           run:
-            working-directory: scripts
+            working-directory: "CastelIQ HUB"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
