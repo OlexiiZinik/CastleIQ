@@ -3,6 +3,11 @@ from database_manager import *
 from logger import logger
 
 
+@app.on_event('startup')
+def on_startup():
+    logger.info("App started")
+
+
 def main():
     pass
     
