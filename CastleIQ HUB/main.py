@@ -1,5 +1,5 @@
 from api import app
-from database_manager import *
+from database_manager import init_db
 from logger import logger
 
 
@@ -9,8 +9,8 @@ def on_startup():
 
 
 def main():
-    pass
-    
+    init_db(app)
+
 
 if __name__ == "main":
     main()

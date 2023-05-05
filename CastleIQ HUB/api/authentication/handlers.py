@@ -1,10 +1,10 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 from tortoise.exceptions import IntegrityError
 
-from .models import UserInPydantic, UserPydantic
+from .models import UserInPydantic, UserPydantic, User, Token, UserCredentials
 from .services import UserService
 from logger import logger
-
 
 router = APIRouter(prefix="/users", tags=["Authentication"])
 service = UserService()
@@ -15,10 +15,22 @@ async def all_users():
     return await service.api_get_all()
 
 
-@router.post("/create", response_model=UserPydantic)
-async def create_user(user: UserInPydantic):
-    try:
-        return await service.api_create_object(user)
-    except IntegrityError as e:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'User with username '
-                                                                         f'{user.username} already exists')
+@router.post("/register", status_code=201, response_model=Token)
+async def register_user(credentials: UserCredentials):
+    return await service.register_user(credentials)
+
+
+@router.post("/login", response_model=Token)
+async def login_user(user: UserCredentials):
+    return await service.login(user)
+
+
+@router.post("/loginform", response_model=Token)
+async def login_form(token=Depends(service.login_form)):
+    print(token)
+    return token
+
+
+@router.get("/me", response_model=UserPydantic)
+async def get_me(user: User = Depends(service.get_current_user)):
+    return user

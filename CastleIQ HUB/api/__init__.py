@@ -1,5 +1,6 @@
-from fastapi import FastAPI, APIRouter
-import importlib
+from fastapi import FastAPI
+
+from  core.apps import include_apps
 
 from config import conf
 from logger import logger
@@ -17,30 +18,10 @@ async def hello_world():
     return {"message": "Hello world"}
 
 
-# TODO export to core
+@app.post("/test")
+async def hello_world(param1: int, param2: int):
+    return {"message": "Hello world", "param1": param1, "param2": param2}
+
+
 if __name__ == "api":
-    for a in conf.apps:
-        try:
-            lib = importlib.import_module(a)
-        except ModuleNotFoundError:
-            logger.warning(f'App {a} does not exist')
-            continue
-
-        router = getattr(lib, "router", None)
-        if router is None or type(router) != APIRouter:
-            logger.debug(f'Router in {a}.__init__ not found')
-            logger.debug(f'Importing {a}.handlers')
-            try:
-                handlers = importlib.import_module(a + '.handlers')
-            except ModuleNotFoundError:
-                logger.warning(f'App {a} does contain handlers.py')
-                continue
-
-            router = getattr(handlers, "router", None)
-
-            if router is None or type(router) != APIRouter:
-                logger.warning(f"App {a} does not have a router in {a}.handlers")
-                continue
-
-        app.include_router(router)
-        logger.info(f'App {a} included successfully')
+    include_apps(app, conf.apps)

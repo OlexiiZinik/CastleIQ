@@ -1,26 +1,13 @@
 from tortoise.contrib.fastapi import register_tortoise
 from config import conf
-from api import app
-from logger import logger
 
-TORTOISE_ORM = {
-    "connections": {
-        "default": conf.db_conn_str,
-    },
-    "apps": {
-        "modules": {
-            "models": [a + '.models' for a in conf.apps] + ["aerich.models"],
-            "default_connection": "default",
-        },
-    },
-    "add_exception_handlers": True
-}
 
-register_tortoise(
-    app,
-    config=TORTOISE_ORM,
-    add_exception_handlers=True
-)
+def init_db(app):
+    register_tortoise(
+        app,
+        config=conf.tortoise_config,
+        add_exception_handlers=True
+    )
 
 # register_tortoise(
 #     app,
