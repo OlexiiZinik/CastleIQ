@@ -5,14 +5,6 @@ from config import conf
 def init_db(app):
     register_tortoise(
         app,
-        config=conf.tortoise_config,
+        config=conf.tortoise_conf,
         add_exception_handlers=True
     )
-
-# register_tortoise(
-#     app,
-#     db_url=conf.db_conn_str,
-#     modules={"models": [a + '.models' for a in conf.apps]},
-#     generate_schemas=True,
-#     add_exception_handlers=True
-# )

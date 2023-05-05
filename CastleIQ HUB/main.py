@@ -1,4 +1,5 @@
 from api import app
+from config import conf
 from database_manager import init_db
 from logger import logger
 
@@ -9,7 +10,8 @@ def on_startup():
 
 
 def main():
-    init_db(app)
+    if not conf.testing:
+        init_db(app)
 
 
 if __name__ == "main":

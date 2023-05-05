@@ -1,3 +1,5 @@
+import os
+
 from pydantic import BaseSettings
 
 
@@ -12,8 +14,8 @@ class Config(BaseSettings):
     db_conn_str: str = "sqlite:///./db.sqlite"
     test_conn_str: str = "sqlite://:memory:"
     apps: list[str] = [
-        "api.direct_device_api",
-        "api.ui_api",
+        # "api.direct_device_api",
+        # "api.ui_api",
         "api.authentication"
     ]
     # Dummy secret key (used for testing) DO NOT USE IT IN PRODUCTION! Run $ openssl rand -hex 32 to generate new one
@@ -23,16 +25,16 @@ class Config(BaseSettings):
     token_expire_minutes: int = 60
 
     @property
-    def tortoise_config(self):
+    def tortoise_conf(self):
         return {
             "connections": {
                 "default": self.db_conn_str,
-                "test": self.test_conn_str,
+
             },
             "apps": {
                 "modules": {
                     "models": [a + '.models' for a in self.apps] + ["aerich.models"],
-                    "default_connection": "default" if not self.testing else "test",
+                    "default_connection": "default",
                 },
             },
             "add_exception_handlers": True

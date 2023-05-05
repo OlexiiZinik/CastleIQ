@@ -1,6 +1,5 @@
 import asyncio
 import pytest
-from tortoise.contrib.test import finalizer, initializer
 from tortoise.exceptions import DBConnectionError, OperationalError, DoesNotExist
 from pydantic import BaseModel
 

@@ -28,6 +28,12 @@ async def test_register(client: AsyncClient, credentials: UserCredentials):
 
 
 @pytest.mark.anyio
+async def test_register_already_existing(client: AsyncClient, credentials: UserCredentials):
+    response = await client.post("/users/register", content=credentials.json())
+    assert response.status_code == 409
+
+
+@pytest.mark.anyio
 async def test_login(client: AsyncClient, credentials: UserCredentials):
     response = await client.post("/users/login", content=credentials.json())
     assert response.status_code == 200
@@ -53,5 +59,3 @@ async def test_get_me_authorized(client: AsyncClient, credentials: UserCredentia
     assert response_get_me.status_code == 200
     user = UserPydantic.parse_raw(response_get_me.text)
     assert user.username == credentials.username
-
-
