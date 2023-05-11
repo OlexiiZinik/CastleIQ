@@ -1,22 +1,10 @@
 import asyncio
 import pytest
-from tortoise.contrib.test import finalizer, initializer
 from tortoise.exceptions import DBConnectionError, OperationalError, DoesNotExist
 from pydantic import BaseModel
 
 from core.services import ModelService
 from .testmodels import ExampleModel, ExamplePydantyc
-
-
-@pytest.fixture(scope="module")
-def anyio_backend():
-    return "asyncio"
-
-
-@pytest.fixture(scope="module", autouse=True)
-def initialize_db(request):
-    initializer(["tests.testmodels"])
-    request.addfinalizer(finalizer)
 
 
 @pytest.fixture
