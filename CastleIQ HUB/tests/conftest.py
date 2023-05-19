@@ -3,7 +3,7 @@ from tortoise.contrib.test import finalizer, initializer
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
 from config import conf
-
+from logger import logger
 
 @pytest.fixture(scope="session")
 def anyio_backend():
@@ -18,6 +18,9 @@ def initialize_db(request):
 
 @pytest.fixture(scope="session")
 async def client():
+    logger.disable("api")
+    logger.disable("core")
+    logger.disable("main")
     conf.testing = True
     from main import app
     async with LifespanManager(app):
