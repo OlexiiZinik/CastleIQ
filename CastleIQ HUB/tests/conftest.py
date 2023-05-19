@@ -22,6 +22,9 @@ def initialize_db(request):
 
 @pytest.fixture(scope="session")
 async def client():
+    logger.disable("api")
+    logger.disable("core")
+    logger.disable("main")
     conf.testing = True
     from main import app
     async with LifespanManager(app):
