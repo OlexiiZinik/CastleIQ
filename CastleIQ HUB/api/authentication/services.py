@@ -9,6 +9,7 @@ from tortoise.exceptions import IntegrityError
 from core.services import ModelService
 from .models import User, UserPydantic, UserInPydantic, Token, UserCredentials
 from config import conf
+from .events import *
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -41,46 +42,38 @@ class UserService(ModelService):
             payload = jwt.decode(token, conf.secret_key, algorithms=conf.algorithm)
             return payload['sub']
         except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail='Signature has expired')
+            TokenExpiredError().fire()
         except jwt.JWTError as e:
-            raise HTTPException(status_code=401, detail='Invalid token')
+            InvalidTokenError().fire()
 
-    async def register_user(self, user: UserCredentials) -> Token:
+    async def register_user(self, user: UserCredentials) -> UserCreatedEvent:
         try:
             pyd = UserInPydantic(username=user.username, hashed_password=pwd_context.hash(user.password))
             u = await self.api_create_object(pyd)
         except IntegrityError as e:
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f'User with username '
-                                                                             f'{user.username} already exists')
+            UserAlreadyExistsError().fire()
         token = self.encode_token({"sub": getattr(u, "username", None)})
-        return Token(access_token=token, token_type="Bearer")
+        return UserCreatedEvent(user=u, token=Token(access_token=token, token_type="Bearer"))
 
-    async def login(self, credentials: UserCredentials) -> Token:
+    async def login(self, credentials: UserCredentials) -> UserLoggedInEvent:
         u = await self.get_user_by_username(credentials.username)
         if (not u) or (not pwd_context.verify(credentials.password, u.hashed_password)):
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=f'Invalid credentials')
+            WrongCredentialsError().fire()
 
         token = self.encode_token({"sub": u.username})
-
-        return Token(access_token=token, token_type="Bearer")
+        return UserLoggedInEvent(token=Token(access_token=token, token_type="Bearer"), user=u)
 
     async def login_form(self, credentials: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm)):
         uc = UserCredentials(username=credentials.username, password=credentials.password)
         return await self.login(uc)
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> User:
-        credentials_exception = HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-        # payload = jwt.decode(token, conf.secret_key, algorithms=[conf.algorythm])
         username: str = self.decode_token(token)
         if username is None:
-            raise credentials_exception
+            WrongCredentialsError().fire()
 
         user = await self.get_user_by_username(username)
         if user is None:
-            raise credentials_exception
+            WrongCredentialsError().fire()
         return user
 
