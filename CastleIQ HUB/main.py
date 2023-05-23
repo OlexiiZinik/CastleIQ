@@ -3,6 +3,7 @@ from tortoise.contrib.fastapi import register_tortoise
 from api import app
 from config import conf
 from logger import logger
+from tortoise.contrib.fastapi import register_tortoise
 
 
 @app.on_event('startup')
