@@ -1,7 +1,9 @@
+from tortoise.contrib.fastapi import register_tortoise
+
 from api import app
 from config import conf
-from database_manager import init_db
 from logger import logger
+from tortoise.contrib.fastapi import register_tortoise
 
 
 @app.on_event('startup')
@@ -11,7 +13,11 @@ def on_startup():
 
 def main():
     if not conf.testing:
-        init_db(app)
+        register_tortoise(
+            app,
+            config=conf.tortoise_conf,
+            add_exception_handlers=True
+        )
 
 
 if __name__ == "main":
