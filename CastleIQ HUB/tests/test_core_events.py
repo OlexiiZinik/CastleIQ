@@ -28,6 +28,15 @@ def test_registering_event():
         em.register_event(Event)
 
 
+def test_event_fires(event_manager: EventManager):
+    def sub(event: TestEvent):
+        raise ValueError("Succes")
+
+    event_manager.subscribe_on(TestEvent, sub)
+    with pytest.raises(ValueError):
+        event_manager.fire(TestEvent(message="Test"))
+
+
 def test_subscribe_on_event(event_manager: EventManager):
     def sub(event: TestEvent):
         assert event.event_name == "TestEvent"
