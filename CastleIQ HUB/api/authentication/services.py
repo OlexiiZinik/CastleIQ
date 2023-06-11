@@ -13,7 +13,7 @@ from .events import *
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/loginform")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/users/loginform", auto_error=False)
 
 
 class UserService(ModelService):
@@ -56,6 +56,7 @@ class UserService(ModelService):
         return UserCreatedEvent(user=u, token=Token(access_token=token, token_type="Bearer"))
 
     async def login(self, credentials: UserCredentials) -> UserLoggedInEvent:
+        print(credentials)
         u = await self.get_user_by_username(credentials.username)
         if (not u) or (not pwd_context.verify(credentials.password, u.hashed_password)):
             WrongCredentialsError().fire()
@@ -65,9 +66,13 @@ class UserService(ModelService):
 
     async def login_form(self, credentials: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm)):
         uc = UserCredentials(username=credentials.username, password=credentials.password)
-        return await self.login(uc)
+        logged_in_event = await self.login(uc)
+        return logged_in_event.token
 
     async def get_current_user(self, token: str = Depends(oauth2_scheme)) -> User:
+        if token is None:
+            UserNotAuthorizedError().fire()
+
         username: str = self.decode_token(token)
         if username is None:
             WrongCredentialsError().fire()
@@ -76,4 +81,3 @@ class UserService(ModelService):
         if user is None:
             WrongCredentialsError().fire()
         return user
-

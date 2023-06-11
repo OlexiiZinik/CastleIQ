@@ -61,5 +61,5 @@ async def test_get_me_authorized(client: AsyncClient, credentials: UserCredentia
     headers = Headers({"Authorization": f'{token.token_type} {token.access_token}'})
     response_get_me = await client.get("/users/me", headers=headers)
     assert response_get_me.status_code == 200
-    user = UserPydantic.parse_raw(response_get_me.text)
-    assert user.username == credentials.username == logged_in_event.user.username
+    get_me_event = GetMeEvent.parse_raw(response_get_me.text)
+    assert get_me_event.user.username == credentials.username == logged_in_event.user.username

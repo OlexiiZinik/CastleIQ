@@ -1,8 +1,10 @@
 import pytest
 
-from core.events.event_manager import EventManager
-from core.events.events import Event, EventResult
+from castleiq_events import EventManager
+from castleiq_events import Event, EventResult
 
+
+# TODO rewrite
 
 class TestEvent(Event):
     status_code = 200
@@ -28,33 +30,32 @@ def test_registering_event():
         em.register_event(Event)
 
 
-def test_event_fires(event_manager: EventManager):
+async def test_event_fires(event_manager: EventManager):
     def sub(event: TestEvent):
-        raise ValueError("Succes")
+        raise ValueError("Success")
 
     event_manager.subscribe_on(TestEvent, sub)
     with pytest.raises(ValueError):
-        event_manager.fire(TestEvent(message="Test"))
+        await event_manager.fire(TestEvent(message="Test"))
 
 
-def test_subscribe_on_event(event_manager: EventManager):
+async def test_subscribe_on_event(event_manager: EventManager):
     def sub(event: TestEvent):
         assert event.event_name == "TestEvent"
         assert event.message == "Test"
 
     event_manager.subscribe_on(TestEvent, sub)
-    event_manager.fire(TestEvent(message="Test"))
+    await event_manager.fire(TestEvent(message="Test"))
 
     with pytest.raises(ValueError):
         event_manager.subscribe_on(TestEvent, sub)
 
 
-def test_decorator(event_manager: EventManager):
+
+async def test_decorator(event_manager: EventManager):
     @event_manager.on(TestEvent)
     def sub(event: TestEvent):
         assert event.event_name == "TestEvent"
         assert event.message == "Test"
 
-    event_manager.fire(TestEvent(message="Test"))
-
-
+    await event_manager.fire(TestEvent(message="Test"))

@@ -12,5 +12,7 @@ if __name__ == '__main__':
         host=conf.host,
         port=conf.port,
         reload=conf.debug and conf.reload,
-        use_colors=True
+        use_colors=True,
+        ssl_keyfile="localhost+1-key.pem",
+        ssl_certfile="localhost+1.pem"
     )
