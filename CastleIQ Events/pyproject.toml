@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+[project]
+name = "castleiq_events"
+version = "0.0.1"
+authors = [
+  { name="Oleksii Zinin", email="3802293+dev@gmail.com" },
+]
+description = "Event system for CastleIQ home automation project"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "fastapi >= 0.95.0",
+    "pydantic >= 1.10.7"
+]
+
+#[options.package_data]
+#castleiq_events = py.typed
+
+[project.urls]
+"Homepage" = "https://github.com/OlexiiZinik/CastleIQ"

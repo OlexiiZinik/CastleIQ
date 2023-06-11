@@ -1,43 +1,43 @@
-from core.events.events import Event, EventResult
+from castleiq_events import ResponseEvent, EventResult, RequestEvent
 from .models import UserPydantic, Token
 
 
-class InvalidTokenError(Event):
+class InvalidTokenError(ResponseEvent):
     status_code = 401
     event_result = EventResult.ERROR
     event_name = "InvalidTokenError"
     message = "JWT не дійсний"
 
 
-class TokenExpiredError(Event):
+class TokenExpiredError(ResponseEvent):
     status_code = 401
     event_result = EventResult.ERROR
     event_name = "TokenExpiredError"
     message = "Час токену сплив"
 
 
-class WrongCredentialsError(Event):
+class WrongCredentialsError(ResponseEvent):
     status_code = 401
     event_result = EventResult.ERROR
     event_name = "WrongCredentialsError"
     message = "Логін чи пароль не вірні"
 
 
-class UserAlreadyExistsError(Event):
+class UserAlreadyExistsError(ResponseEvent):
     status_code = 409
     event_result = EventResult.ERROR
     event_name = "UserAlreadyExistsError"
     message = "Користувач з таким логіном вже існує"
 
 
-class UserNotAuthorizedError(Event):
+class UserNotAuthorizedError(ResponseEvent):
     status_code = 401
     event_result = EventResult.ERROR
     event_name = "UserNotAuthorizedError"
     message = "Немає доступу. Користувач не авторизований"
 
 
-class UserCreatedEvent(Event):
+class UserCreatedEvent(ResponseEvent):
     status_code = 201
     event_result = EventResult.SUCCESS
     event_name = "UserCreatedEvent"
@@ -46,10 +46,19 @@ class UserCreatedEvent(Event):
     token: Token
 
 
-class UserLoggedInEvent(Event):
+class UserLoggedInEvent(ResponseEvent):
     status_code = 200
     event_result = EventResult.SUCCESS
     event_name = "LoggedInEvent"
     message = "Користувач успішно увійшов"
     user: UserPydantic
     token: Token
+
+
+class GetMeEvent(ResponseEvent):
+    status_code = 200
+    event_result = EventResult.SUCCESS
+    event_name = "GetMeEvent"
+    user: UserPydantic
+    message = "Користувача знайдено"
+

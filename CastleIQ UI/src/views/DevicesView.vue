@@ -3,8 +3,8 @@
         <h1 class="">Пристрої</h1>
         <a href="#" class="btn btn-primary ms-auto my-auto">Додати пристрій</a>
     </div>
-    <div class="row" v-for="device in this.$store.state.devices.devices">
-        <Device :device="device"></Device>
+    <div class="row" >
+        <Device :device="device" v-for="device in this.$store.state.devices.devices"></Device>
     </div>
 </template>
 

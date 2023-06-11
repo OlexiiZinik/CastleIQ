@@ -1,4 +1,4 @@
-const REST_API = "https://127.0.0.1:8000"
+const REST_API = "https://10.10.10.14:8000"
 
 export default {
     namespaced: true,
@@ -18,9 +18,6 @@ export default {
             await fetch(`${REST_API}/users/all`, { headers: headers, method: "GET" })
                 .then(async response => {
                     const data = await response.json();
-                    console.log(response)
-                    console.log(data)
-
                     if (data.event_result) {
                         return data
                     }
@@ -57,14 +54,11 @@ export default {
         },
 
         logIn(state, credentials){
-            console.log(JSON.stringify(credentials))
             fetch(`${REST_API}/users/login`, { method: "POST",headers: {
                 "Content-Type": "application/json",
               }, body: JSON.stringify(credentials) })
                 .then(async response => {
                     const data = await response.json();
-                    console.log(response)
-                    console.log(data)
 
                     if (data.event_result) {
                         return data
@@ -88,9 +82,9 @@ export default {
                             if (data.event_name == "LoggedInEvent"){
                                 this.commit("auth/changeUsername", data.user.username) 
                                 let token = `${data.token.token_type} ${data.token.access_token}`
-                                console.log(token)
                                 localStorage.setItem("Token", token)
 
+                                
                             }
                         }
                     }

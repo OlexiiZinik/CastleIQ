@@ -31,6 +31,7 @@ async def login_form(token=Depends(service.login_form)):
     return token
 
 
-@router.get("/me", response_model=UserPydantic)
+@router.get("/me", response_model=GetMeEvent)
 async def get_me(user: User = Depends(service.get_current_user)):
+    user = GetMeEvent(user=user)
     return user

@@ -1,3 +1,5 @@
+import importlib
+
 import pytest
 from tortoise.contrib.test import finalizer, initializer
 from asgi_lifespan import LifespanManager
@@ -16,7 +18,12 @@ def initialize_db(request):
     logger.disable("api")
     logger.disable("main")
     logger.disable("core")
-    initializer([a + '.models' for a in conf.apps] + ["tests.testmodels"], db_url=conf.test_conn_str)
+    models = [a + '.models' for a in conf.apps] + ["tests.testmodels"]
+    print(models)
+    for app in models:
+        importlib.import_module(app)
+
+    initializer(models, db_url=conf.test_conn_str)
     request.addfinalizer(finalizer)
 
 

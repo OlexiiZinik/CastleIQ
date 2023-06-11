@@ -4,7 +4,7 @@ from pydantic import BaseSettings
 
 
 class Config(BaseSettings):
-    host: str = "127.0.0.1"
+    host: str = "0.0.0.0"
     port: int = 8000
     debug: bool = True
     reload: bool = True
@@ -14,8 +14,8 @@ class Config(BaseSettings):
     db_conn_str: str = "sqlite:///./db.sqlite"
     test_conn_str: str = "sqlite://:memory:"
     apps: list[str] = [
-        # "api.direct_device_api",
-        # "api.ui_api",
+        "api.direct_device_api",
+        "api.ui_api",
         "api.authentication"
     ]
     # Dummy secret key (used for testing) DO NOT USE IT IN PRODUCTION! Run $ openssl rand -hex 32 to generate new one
@@ -45,3 +45,4 @@ conf = Config(
     _env_file=".env",
     _env_file_encoding="utf-8"
 )
+TORTOISE_CONFIG = conf.tortoise_conf
