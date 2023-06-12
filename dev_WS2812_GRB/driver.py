@@ -36,6 +36,7 @@ def get_my_id():
         my_id = file.readline()
         return int(my_id)
 
+
 def get_my_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(("8.8.8.8", 80))
@@ -57,8 +58,8 @@ def get_device():
 
 
 @driver.post("/fire_event")
-def web_hook(event: RequestEvent):
-    res = event_manager.fire(event)
+async def web_hook(event: RequestEvent):
+    res = await event_manager.fire(event)
     if res:
         return res[0]
 
