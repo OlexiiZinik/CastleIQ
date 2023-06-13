@@ -3,7 +3,7 @@ import messages from './messages';
 import auth from './auth'
 import devices from './devices';
 
-const REST_API = 'https://127.0.0.1:8000/';
+const REST_API = "https://10.10.10.15:8000";
 
 const store = createStore({
     state: {
