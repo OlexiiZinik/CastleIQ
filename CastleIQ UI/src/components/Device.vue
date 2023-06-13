@@ -76,7 +76,6 @@
 </template>
 
 <script>
-import FormControl from './formControl.vue'
 export default {
     data() {
         return {
@@ -121,7 +120,6 @@ export default {
         }
     },
     components: {
-        FormControl
     },
     created() {
         for (let i = 0; i < this.device.events.length; i++) {
