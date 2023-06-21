@@ -1,10 +1,7 @@
-from tortoise.contrib.fastapi import register_tortoise
-
 from api import app
 from config import conf
 from logger import logger
 from tortoise.contrib.fastapi import register_tortoise
-from event_manager import event_manager
 
 
 @app.on_event('startup')
@@ -24,7 +21,5 @@ def main():
 if __name__ == "main":
     main()
 
-
 if __name__ == '__main__':
     logger.critical("Program started as __main__")
-    

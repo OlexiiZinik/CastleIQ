@@ -23,10 +23,11 @@ import { RouterLink } from 'vue-router'
                         <a href="#" class="nav-link disabled">Користувачі</a>
                     </li>
                     <li class="nav-item">
-                        <RouterLink class="nav-link active" to="/devices">Пристрої</RouterLink>
+                        <RouterLink class="nav-link" to="/devices">Пристрої</RouterLink>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link disabled">Автоматизації</a>
+                        <RouterLink class="nav-link active" to="/automations">Автоматизації</RouterLink>
+                        <!-- <a href="#" class="nav-link active">Автоматизації</a> -->
                     </li>
                     <!-- <li class="nav-item">
                         <RouterLink class="nav-link active" to="/about">About</RouterLink>

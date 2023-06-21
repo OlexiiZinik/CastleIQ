@@ -24,13 +24,14 @@ user_service = UserService()
 router = APIRouter(prefix="/dev_api", tags=["DeviceAPI"])
 
 
-@router.post("/connect_new", response_model=DeviceInfo)
+@router.post("/connect_new", response_model=DeviceConnected)
 async def connect_new_device(connect_new_device_event: ConnectNewDevice,
                              user: User = Depends(user_service.get_current_user)):
     logger.info(connect_new_device_event)
 
     async with httpx.AsyncClient() as client:
         # Get info about device
+        print(f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}/get_info')
         try:
             response = await client.get(
                 f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}/get_info')
@@ -54,7 +55,7 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
                     pass
 
         except httpx.ConnectError:
-            ConnectionFailedError().fire()
+            ConnectionFailedError(message="Не вдалось отримати інформацію про пристрій").fire()
 
         except pydantic.ValidationError:
             ConnectionFailedError(staus_code=500, message="Щось пішло не так. Не вдалось розпарсити DeviceInfo").fire()
@@ -65,7 +66,7 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
             db_device.ip = device_info.webhook.ip
             db_device.port = device_info.webhook.port
             db_device.path = device_info.webhook.path
-            db_device.room = ""
+            db_device.room = connect_new_device_event.room
             await db_device.save()
             for device_event in device_info.events:
                 de = await DeviceEvent.create(
@@ -85,7 +86,7 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
                     f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}{connect_new_device_event.webhook.path}',
                     content=connect_event.json())
                 device_info = DeviceInfo.parse_raw(response.text)
-
+                print(device_info)
                 assert device_info.id == db_device.pk
                 return DeviceConnected(device_info=device_info)
 

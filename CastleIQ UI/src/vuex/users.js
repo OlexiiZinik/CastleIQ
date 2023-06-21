@@ -1,4 +1,4 @@
-const REST_API = "https://10.10.10.15:8000"
+const REST_API = "https://10.10.10.14:8000"
 
 export default {
     namespaced: true,

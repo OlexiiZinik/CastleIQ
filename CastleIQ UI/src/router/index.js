@@ -4,6 +4,7 @@ import TestVue from '../views/TestView.vue'
 import LogInView from '../views/LogInView.vue'
 import UsersView from '../views/UsersView.vue'
 import DevicesView from '../views/DevicesView.vue'
+import AutomationsView from '../views/AutomationsView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -40,6 +41,11 @@ const router = createRouter({
       path: '/devices',
       name: 'devices',
       component: DevicesView
+    },
+    {
+      path: '/automations',
+      name: 'automations',
+      component: AutomationsView
     }
   ]
 })

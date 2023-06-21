@@ -9,6 +9,7 @@ from event_manager import event_manager
 class ConnectNewDevice(RequestEvent):
     event_name = "ConnectNewDevice"
     webhook: Webhook
+    room: str
 
 
 class ConnectionFailedError(ResponseEvent):
