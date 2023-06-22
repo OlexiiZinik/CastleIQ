@@ -6,9 +6,8 @@ from fastapi.routing import APIRouter
 import httpx
 from tortoise.exceptions import DoesNotExist
 
-from castleiq_events.common import ConnectEvent, DeviceInfo, Webhook, EventDescription
+from castleiq_events.common import ConnectEvent, DeviceInfo, Webhook, EventDescription, get_my_ip
 from castleiq_events import RequestEvent
-import socket
 
 from castleiq_events.events import ForwardEvent, Direction
 from .models import Device, DeviceEvent, DevicePydantic
@@ -31,7 +30,8 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
 
     async with httpx.AsyncClient() as client:
         # Get info about device
-        print(f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}/get_info')
+        print(
+            f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}/get_info')
         try:
             response = await client.get(
                 f'{connect_new_device_event.webhook.protocol}://{connect_new_device_event.webhook.ip}:{connect_new_device_event.webhook.port}/get_info')
@@ -42,12 +42,14 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
                     device = await Device.get(id=device_info.id)
                     await device.events.all().delete()
                     await device.save()
+                    print(device_info.events[1].outgoing)
                     for device_event in device_info.events:
                         de = await DeviceEvent.create(
                             device=device,
                             name=device_event.name,
                             description="",
-                            event_schema=device_event.event_schema
+                            event_schema=device_event.event_schema,
+                            outgoing=device_event.outgoing
                         )
                         await de.save()
                     DeviceConnected(message="Пристрій вже під'єднано", device_info=device_info).fire()
@@ -74,12 +76,13 @@ async def connect_new_device(connect_new_device_event: ConnectNewDevice,
                     name=device_event.name,
                     description="",
                     event_schema=device_event.event_schema,
+                    outgoing=device_event.outgoing
                 )
                 await de.save()
 
             try:
                 connect_event = ConnectEvent(
-                    hub_webhook=Webhook(ip=socket.gethostbyname(socket.gethostname()), port=conf.port,
+                    hub_webhook=Webhook(ip=get_my_ip(), port=conf.port,
                                         path="/dev_api/fire_event"), id=db_device.pk)
 
                 response = await client.post(
@@ -104,14 +107,13 @@ async def all_devices(user: User = Depends(user_service.get_current_user)):
         dev_pydantic = DevicePydantic(
             name=dev.name,
             description=dev.description,
-            events=[EventDescription(name=ev.name, event_schema=json.loads(str(ev.event_schema).replace("'", '"'))) for
+            events=[EventDescription(name=ev.name, event_schema=json.loads(str(ev.event_schema).replace("'", '"')), outgoing=ev.outgoing) for
                     ev in dev.events],
             id=dev.pk,
             webhook=Webhook(protocol=dev.protocol, ip=dev.ip, port=dev.port, path=dev.path),
             room=dev.room
         )
         devices_pydantic.devices.append(dev_pydantic)
-
     return devices_pydantic
 
 
@@ -142,6 +144,7 @@ async def forward_to_device(event: ForwardEvent):
                 content=json.dumps(event.event))
             logger.debug(response)
             logger.debug(response.text)
+            await event_manager.fire(response.text)
             return json.loads(response.text)
     except httpx.ConnectError:
         ConnectionFailedError().fire()

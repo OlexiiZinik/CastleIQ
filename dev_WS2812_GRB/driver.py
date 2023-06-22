@@ -1,8 +1,7 @@
 import os
 
 import uvicorn
-import socket
-from castleiq_events.common import Webhook, EventDescription
+from castleiq_events.common import Webhook, EventDescription, get_my_ip
 
 from loader import driver, event_manager, pixels, num_pixels
 from events import *
@@ -37,18 +36,10 @@ def get_my_id():
         return int(my_id)
 
 
-def get_my_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(("8.8.8.8", 80))
-    ip = s.getsockname()[0]
-    s.close()
-    return ip
-
-
 @driver.get("/get_info")
 def get_device():
     device = DeviceInfo(
-        events=[EventDescription(name=ev["name"], event_schema=ev["event_schema"]) for ev in event_manager.get_registered_events()],
+        events=[EventDescription(name=ev["name"], event_schema=ev["event_schema"], outgoing=ev["outgoing"]) for ev in event_manager.get_registered_events()],
         name="WS2812 Lamp",
         description="Розумна лампа на адресованих світлодіодах",
         webhook=Webhook(ip=get_my_ip(), port=8001, path="/fire_event"),

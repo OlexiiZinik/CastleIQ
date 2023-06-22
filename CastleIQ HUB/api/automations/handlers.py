@@ -19,6 +19,7 @@ from event_manager import event_manager
 from api.authentication.services import UserService
 from .services import AutomationsService
 from ..authentication.models import User
+from ..direct_device_api.models import DeviceEvent
 
 user_service = UserService()
 
@@ -52,6 +53,8 @@ async def create_automation(user: User = Depends(auth_service.get_current_user),
 
 @router.get("/update")
 async def update_automations(user: User = Depends(auth_service.get_current_user)):
+    for ev in await DeviceEvent.all():
+        event_manager.register_event(None, ev.name)
     for automation in await Automation.all():
         event_manager.add_automation(automation.subscribed_on, automation.code)
 

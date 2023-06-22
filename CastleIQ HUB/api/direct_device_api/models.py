@@ -34,4 +34,5 @@ class DeviceEvent(Model):
     device = fields.ForeignKeyField("modules.Device", "events")
     name = fields.CharField(max_length=100)
     description = fields.CharField(max_length=500)
+    outgoing = fields.BooleanField(default=False)
     event_schema = fields.TextField()
