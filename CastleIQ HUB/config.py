@@ -16,7 +16,8 @@ class Config(BaseSettings):
     apps: list[str] = [
         "api.direct_device_api",
         "api.ui_api",
-        "api.authentication"
+        "api.authentication",
+        "api.automations"
     ]
     # Dummy secret key (used for testing) DO NOT USE IT IN PRODUCTION! Run $ openssl rand -hex 32 to generate new one
     secret_key: str = "4c93bbc6b1266ed337b6e3571ab5868134c230a13741479028cafa284888c14c"

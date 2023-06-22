@@ -1,21 +1,25 @@
 import inspect
+import json
 from typing import Callable, Any, TypeVar
 
-from .events import Event
+from .events import Event, ForwardEvent
 
 E = TypeVar("E", bound=Event)
 Subscriber = Callable[[E], Any]
 
 
 class EventWrapper:
-    def __init__(self, event_class: type[E]):
-        self.event_class: type[E] = event_class
-        self.name: str = event_class.__name__
+    def __init__(self, event_class: type[E] | None, event_name: str | None = None):
+        self.event_class: type[E] | None = event_class
+        self.name: str = event_class.__name__ if event_class else event_name
         self.subscribers: list[Subscriber] = []
 
     async def notify_subscribers(self, event: E) -> list[Any] | None:
         results = []
-        event = self.event_class(**(event.dict()))
+        if self.event_class:
+            event = self.event_class(**(event.dict()))
+        else:
+            event = event
         for subscriber in self.subscribers:
             if inspect.iscoroutinefunction(subscriber):
                 results.append(await subscriber(event))
@@ -36,21 +40,21 @@ class EventManager:
         self._events: list[EventWrapper] = []
         self._registered_events: list[EventWrapper] = []
 
-    def register_ingoing_event(self, event_class: type[E]):
+    def register_ingoing_event(self, event_class: type[E] | None, name: str | None = None):
         try:
-            self.register_event(event_class)
+            self.register_event(event_class, name)
         except ValueError:
             pass
 
-        if not self.find_event_wrapper_by_name(event_class.__name__, self._registered_events):
-            self._registered_events.append(EventWrapper(event_class))
+        if not self.find_event_wrapper_by_name(event_class.__name__ if event_class else name, self._registered_events):
+            self._registered_events.append(EventWrapper(event_class, name))
         else:
             pass
         return event_class
 
-    def register_event(self, event_class: type[E]):
-        if not self.find_event_wrapper_by_name(event_class.__name__):
-            self._events.append(EventWrapper(event_class))
+    def register_event(self, event_class: type[E] | None, name: str | None = None):
+        if not self.find_event_wrapper_by_name(event_class.__name__ if event_class else name):
+            self._events.append(EventWrapper(event_class, event_name=name))
         else:
             raise ValueError(f"{event_class} already registered")
         return event_class
@@ -63,22 +67,27 @@ class EventManager:
                 return e
         return None
 
-    async def fire(self, event: E):
-        ew = self.find_event_wrapper_by_name(event.event_name)
+    async def fire(self, event: E | str):
+        if type(event) == str:
+            event = json.loads(event)
+            event_name = event.get("event_name", None)
+        else:
+            event_name = event.event_name
+        ew = self.find_event_wrapper_by_name(event_name)
         if ew is None:
             raise ValueError(f"Event {event} not found")
         return await ew.notify_subscribers(event)
 
-    def subscribe_on(self, event_class: type[E], listener: Subscriber) -> None:
-        ew = self.find_event_wrapper_by_name(event_class.__name__)
+    def subscribe_on(self, event_class: type[E] | None, listener: Subscriber, event_name: str | None = None) -> None:
+        ew = self.find_event_wrapper_by_name(event_class.__name__ if event_class else event_name)
         if not ew:
-            self.register_event(event_class)
-            return self.subscribe_on(event_class, listener)
+            self.register_event(event_class, event_name)
+            return self.subscribe_on(event_class, listener, event_name)
         ew.subscribe(listener)
 
-    def on(self, event_class: type[E]) -> Callable[[Subscriber], Subscriber]:
+    def on(self, event_class: type[E] | None, event_name: str | None = None) -> Callable[[Subscriber], Subscriber]:
         def wrapper(func: Subscriber) -> Subscriber:
-            self.subscribe_on(event_class, func)
+            self.subscribe_on(event_class, func, event_name)
             return func
 
         return wrapper
@@ -88,3 +97,40 @@ class EventManager:
         for ev in self._registered_events:
             events.append({"name": ev.name, "event_schema": ev.event_class.schema()})
         return events
+
+    def forward_event(self, to: int | str, event: E | dict | str, direction="To device"):
+        # event_name = "ForwardEvent"
+        # direction: Direction
+        # device_id: int
+        # event: dict
+        if type(event) == str:
+            event = json.loads(event)
+        elif type(event) == dict:
+            pass
+        else:
+            event = dict(event)
+        forward = ForwardEvent(direction=direction, device_id=to, event=event)
+        self.fire(forward)
+
+    def add_automation(self, event_name, code):
+        wrapper = self.find_event_wrapper_by_name(event_name)
+        if not wrapper:
+            self.register_event(None, event_name)
+        wrapper = self.find_event_wrapper_by_name(event_name)
+        code = compile(code, "<string>", "exec")
+        print(code)
+
+        def automation(event):
+
+            a = exec(code, {
+                "event_manager": self,
+                "event": event,
+                "Event": Event,
+                "forward_to_device": self.forward_event
+            })
+            print(a)
+
+        try:
+            wrapper.subscribe(automation)
+        except ValueError:
+            pass

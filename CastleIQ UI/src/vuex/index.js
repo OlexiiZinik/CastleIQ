@@ -2,6 +2,7 @@ import {createStore} from 'vuex'
 import messages from './messages';
 import auth from './auth'
 import devices from './devices';
+import automations from './automations';
 
 const REST_API = "https://10.10.10.14:8000";
 
@@ -22,6 +23,7 @@ const store = createStore({
         messages,
         auth,
         devices,
+        automations
     }
 });
 
