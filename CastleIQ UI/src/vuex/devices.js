@@ -3,15 +3,19 @@ const REST_API = "https://10.10.10.14:8000"
 export default {
     namespaced: true,
     state: {
-        devices: []
+        devices: [],
+        // socket: new WebSocket('wss://10.10.10.14:8000/ui_api/ws'),
     },
-    mutations:{
-        changeDevices(state, devices){
+    mutations: {
+        changeDevices(state, devices) {
             state.devices = devices
         },
+        // changeSocket(state, socket) {
+        //     state.socket = socket
+        // },
     },
     actions: {
-        async getAllDevices(state){
+        async getAllDevices(state) {
             let headers = new Headers()
             let token = localStorage.getItem("Token")
             headers.append("Authorization", token)
@@ -37,25 +41,25 @@ export default {
                     if (data.event_result) {
                         if (data.event_result == "Error") {
                             if (data.event_name == 'UserNotAuthorizedError' || data.event_name == "TokenExpiredError") {
-                                this.commit("auth/changeUsername", "Unauthorized") 
+                                this.commit("auth/changeUsername", "Unauthorized")
                                 this.commit("messages/show", { type: "warning", message: data.message })
                                 this.commit("auth/changeLoggedIn", false)
                             }
                         }
-                        else{
-                            if (data.event_name == "AllDevices"){
-                                this.commit("devices/changeDevices", data.devices)                                 
+                        else {
+                            if (data.event_name == "AllDevices") {
+                                this.commit("devices/changeDevices", data.devices)
                             }
                         }
                     }
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
-                    this.commit('messages/show', {type:"danger", message:error})
+                    this.commit('messages/show', { type: "danger", message: error })
                 });
         },
 
-        async addDevice(sate, dev_info){
+        async addDevice(sate, dev_info) {
             let headers = new Headers()
             let token = localStorage.getItem("Token")
             headers.append("Authorization", token)
@@ -81,16 +85,16 @@ export default {
                     if (data.event_result) {
                         if (data.event_result == "Error") {
                             if (data.event_name == 'UserNotAuthorizedError' || data.event_name == "TokenExpiredError") {
-                                this.commit("auth/changeUsername", "Unauthorized") 
+                                this.commit("auth/changeUsername", "Unauthorized")
                                 this.commit("messages/show", { type: "warning", message: data.message })
                                 this.commit("auth/changeLoggedIn", false)
                             }
                         }
-                        else if (data.event_name == "ConnectionFailedError"){
+                        else if (data.event_name == "ConnectionFailedError") {
                             this.commit("messages/show", { type: "warning", message: data.message })
                         }
-                        else{
-                            if (data.event_name == "DeviceInfo"){
+                        else {
+                            if (data.event_name == "DeviceInfo") {
                                 await this.$store.dispatch("devices/getAllDevices")
                             }
                         }
@@ -98,11 +102,11 @@ export default {
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
-                    this.commit('messages/show', {type:"danger", message:error})
+                    this.commit('messages/show', { type: "danger", message: error })
                 });
         },
 
-        async forwardEvent(state, event_info){
+        async forwardEvent(state, event_info) {
             let headers = new Headers()
             let token = localStorage.getItem("Token")
             headers.append("Authorization", token)
@@ -138,16 +142,34 @@ export default {
                         if (data.event_result == "Error") {
                             this.commit("messages/show", { type: "danger", message: data.message })
                         }
-                        else{
-                            
+                        else {
+
                         }
                     }
                 })
                 .catch(error => {
                     console.error("There was an error!", error);
-                    this.commit('messages/show', {type:"danger", message:error})
+                    this.commit('messages/show', { type: "danger", message: error })
                 });
-        }
+        },
+
+        // async connectWs(store) {
+        //     //cnsole.log(state)
+        //     //console.log(state.socket)
+        //     //this.commit("devices/changeSocket", socket)
+        //     store.state.socket.onmessage = (event) => {
+        //         store.dispatch("devices/reciveMessage", event)
+        //     };
+        // },
+
+        // async sendMessage(store, data) {            
+        //     store.state.socket.send(JSON.stringify(data));
+        // },
+
+        // async reciveMessage(store, event){
+
+        // }
+
     },
     getters: {
     },

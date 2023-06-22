@@ -64,15 +64,6 @@ export default {
 
     methods: {
         async addDevice(event) {
-            console.log("asd")
-            // "event_name": "ConnectNewDevice",
-            // "event_type": "RequestEvent",
-            // "webhook": {
-            //     "protocol": "http",
-            //         "ip": "string",
-            //             "port": 0,
-            //                 "path": "/fire_event"
-            // }
             await this.$store.dispatch("devices/addDevice", {
                 event_type: "RequestEvent",
                 event_name: "ConnectNewDevice",

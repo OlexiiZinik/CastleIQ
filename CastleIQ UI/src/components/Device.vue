@@ -18,8 +18,9 @@
                 <h6 class="card-subtitle mb-2 text-muted">{{ device.room }}</h6>
                 <p class="card-text">{{ device.description }}</p>
                 <div v-for="event in device.events">
-                    <h3>{{ event.name }}</h3>
-                    <div v-for="[field, description] of Object.entries(event.event_schema.properties)" :field="field">
+                    <h3 v-if="!event.outgoing">{{ event.name }}</h3>
+                    <div v-if="!event.outgoing"
+                        v-for="[field, description] of Object.entries(event.event_schema.properties)" :field="field">
 
                         <div v-if="description.$ref && getReferensed(event, description.$ref) && getReferensed(event, description.$ref).enum"
                             class="form-outline mb-4">
@@ -57,7 +58,9 @@
                                 <label class="form-check-label" :for="`${device.id}_${event.name}_${field}`">
                                     {{ description.title }}
                                 </label>
-                                <input class="form-check-input" type="checkbox" value=""
+                                <!-- <input class="form-check-input" type="checkbox" role="switch"
+                                    :id="`${device.id}_${event.name}_${field}`" v-model="events_constructed[event.name][field]" v-on:change="somethingChanged"> -->
+                                <input class="form-check-input" type="checkbox" role="switch" value=""
                                     :id="`${device.id}_${event.name}_${field}`"
                                     v-model="events_constructed[event.name][field]" v-on:change="somethingChanged" />
                             </div>
@@ -69,6 +72,14 @@
                             </div>
                         </div>
                     </div>
+                    <!-- <div v-else v-for="[field, description] of Object.entries(event.event_schema.properties)">
+                        <div v-if="!['event_name', 'event_type', 'event_result', 'message', 'status_code'].includes(field)">
+                            <label class="form-check-label" :for="`${device.id}_${event.name}_${field}`">
+                                {{ description.title }}
+                            </label>
+                            <h6>value</h6>
+                        </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -117,10 +128,11 @@ export default {
             const b = parseInt(hex.substring(4, 6), 16);
 
             return { R: r, G: g, B: b };
-        }
+        },
     },
     components: {
     },
+
     created() {
         for (let i = 0; i < this.device.events.length; i++) {
             this.events_constructed[this.device.events[i].name] = {}
