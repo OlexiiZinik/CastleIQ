@@ -1,5 +1,5 @@
 import router from '@/router';
-const REST_API = "https://10.10.10.14:8000"
+const REST_API = "https://192.168.88.253:8000"
 
 export default {
     namespaced: true,

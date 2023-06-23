@@ -4,7 +4,7 @@ import auth from './auth'
 import devices from './devices';
 import automations from './automations';
 
-const REST_API = "https://10.10.10.14:8000";
+const REST_API = "https://192.168.88.253:8000";
 
 const store = createStore({
     state: {

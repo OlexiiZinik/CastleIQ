@@ -78,7 +78,7 @@
             <div class="card-body">
                 <h5 class="card-title">{{ automation.description }}</h5>
                 <h6 class="card-title">При {{ automation.subscribed_on }} -></h6>
-                <p class="card-text">{{ automation.code }}</p>
+                <pre class="card-text">{{ automation.code }}</pre>
                 <a href="#" class="btn btn-primary">Редагувати</a>
             </div>
         </div>

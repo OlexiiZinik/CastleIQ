@@ -54,7 +54,10 @@ async def create_automation(user: User = Depends(auth_service.get_current_user),
 @router.get("/update")
 async def update_automations(user: User = Depends(auth_service.get_current_user)):
     for ev in await DeviceEvent.all():
-        event_manager.register_event(None, ev.name)
+        try:
+            event_manager.register_event(None, ev.name)
+        except ValueError:
+            pass
     for automation in await Automation.all():
         event_manager.add_automation(automation.subscribed_on, automation.code)
 

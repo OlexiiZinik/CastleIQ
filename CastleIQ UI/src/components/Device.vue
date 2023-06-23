@@ -18,7 +18,7 @@
                 <h6 class="card-subtitle mb-2 text-muted">{{ device.room }}</h6>
                 <p class="card-text">{{ device.description }}</p>
                 <div v-for="event in device.events">
-                    <h3 v-if="!event.outgoing">{{ event.name }}</h3>
+                    <!-- <h3 v-if="!event.outgoing">{{ event.name }}</h3> -->
                     <div v-if="!event.outgoing"
                         v-for="[field, description] of Object.entries(event.event_schema.properties)" :field="field">
 
